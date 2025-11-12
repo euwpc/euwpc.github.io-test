@@ -8,17 +8,17 @@
 <style>
   :root{
     --bg:#071017; --card:#0f1b22; --muted:#9aa3ad; --accent:#ff6b2d; --accent2:#ffcc00;
-    --good:#2ec4b6; --warn:#ff8c42; --danger:#e64545;
+    --good:#2ec4b6; --warn:#ff8c42; --danger:#e64545; --extreme:#7e22ce;
   }
   *{box-sizing:border-box}
-  body{margin:0; font-family:Inter,Segoe UI,system-ui,Arial; background:linear-gradient(180deg,#021016 0%, #06121a 100%); color:#e6eef0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:28px}
+  body{margin:0; font-family:Inter,Segoe UI,system-ui,Arial; background:linear-gradient(180deg,#021016 0%, #06121a 100%); color:#e6eef0; min-height:100vh; display:flex; align-items:flex-start; justify-content:center; padding:28px}
   .app{width:100%;max-width:940px}
   .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
   h1{font-size:1.1rem;margin:0;color:#dff6ef}
   .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   input,select,button{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#071018;color:inherit}
   button{cursor:pointer;background:var(--accent);color:#081014;border:none;font-weight:700}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.03);padding:18px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.6)}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.03);padding:18px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.6);margin-bottom:18px}
   .row{display:flex;gap:18px;align-items:center}
   .left{flex:1}
   .right{width:360px}
@@ -26,7 +26,7 @@
   .big-score{font-size:48px;font-weight:800;letter-spacing:0.5px}
   .sub{color:var(--muted);font-size:0.9rem}
   .bar-wrap{height:36px;border-radius:10px;background:#071014;border:1px solid rgba(255,255,255,0.03);padding:4px;display:flex;align-items:center}
-  .bar{height:28px;border-radius:8px;flex:1;position:relative;overflow:hidden;background:linear-gradient(90deg,#2ec4b6 0%, #ffcc00 50%, #e64545 100%)}
+  .bar{height:28px;border-radius:8px;flex:1;position:relative;overflow:hidden;background:linear-gradient(90deg,#2ec4b6 0%, #ffcc00 50%, #e64545 80%, #7e22ce 100%)}
   .bar-indicator{position:absolute;top:0;left:0;height:100%;background:rgba(0,0,0,0.25);backdrop-filter:blur(2px)}
   .bar-labels{display:flex;justify-content:space-between;margin-top:8px;font-size:0.85rem;color:var(--muted)}
   .spark{width:100%;height:40px}
@@ -34,8 +34,8 @@
   .footer{margin-top:12px;color:var(--muted);font-size:0.9rem}
   .chip{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-weight:600}
   .status-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle}
-  /* tune small screens */
-  @media (max-width:920px){ .right{width:100%} .row{flex-direction:column;align-items:stretch} .score-box{justify-content:space-between} .big-score{font-size:36px}}
+  .label-small{font-size:0.85rem;color:var(--muted);margin-top:6px}
+  @media (max-width:920px){ .right{width:100%} .row{flex-direction:column;align-items:stretch} .score-box{justify-content:space-between} .big-score{font-size:36px} }
 </style>
 </head>
 <body>
@@ -50,18 +50,19 @@
       </div>
     </div>
 
-    <div class="card" role="region" aria-label="Weather intensity">
+    <!-- Scoreboard A -->
+    <div class="card" role="region" aria-label="Weather intensity primary">
       <div class="row">
         <div class="left">
           <div class="score-box">
             <div>
-              <div class="big-score" id="scoreVal">—</div>
-              <div class="sub" id="scoreLabel">Loading…</div>
+              <div class="big-score" id="scoreValA">—</div>
+              <div class="sub" id="scoreLabelA">Loading…</div>
             </div>
             <div style="flex:1">
               <div class="bar-wrap" aria-hidden="true">
-                <div class="bar" id="spectrumBar">
-                  <div class="bar-indicator" id="barIndicator" style="width:0%"></div>
+                <div class="bar" id="spectrumBarA">
+                  <div class="bar-indicator" id="barIndicatorA" style="width:0%"></div>
                 </div>
               </div>
               <div class="bar-labels">
@@ -72,194 +73,333 @@
             </div>
           </div>
 
-          <div class="meta" id="metaText">—</div>
+          <div class="meta" id="metaTextA">—</div>
         </div>
 
         <div class="right">
-          <canvas id="spark" class="spark" width="360" height="40" style="background:transparent;border-radius:6px"></canvas>
+          <canvas id="sparkA" class="spark" width="360" height="40" style="background:transparent;border-radius:6px"></canvas>
           <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-            <div class="chip" id="windChip">Wind: —</div>
-            <div class="chip" id="presChip">Pressure: —</div>
-            <div class="chip" id="precipChip">Precip: —</div>
+            <div class="chip" id="windChipA">Wind: — km/h</div>
+            <div another="chip" id="presChipA">Pressure: — hPa</div>
+            <div class="chip" id="precipChipA">Precip: — mm</div>
           </div>
         </div>
       </div>
-
-      <div class="footer">Source: <strong>Open-Meteo</strong>. This is a derived index for demonstration — tune weights in code. Data updates every 15 minutes.</div>
+      <div class="footer">Source(s): Open-Meteo + ZoomEarth + Meteologix (if available). Auto-update every 15 minutes.</div>
     </div>
+
+    <!-- Scoreboard B -->
+    <div class="card" role="region" aria-label="Weather intensity box region">
+      <div style="margin-bottom:12px"><strong>Box Tracker</strong> <span class="label-small">Fixed box: top-left lat 62.58 lon 49.42 — bottom-right lat 37.12 lon 37.28</span></div>
+      <div class="row">
+        <div class="left">
+          <div class="score-box">
+            <div>
+              <div class="big-score" id="scoreValB">—</div>
+              <div class="sub" id="scoreLabelB">Loading…</div>
+            </div>
+            <div style="flex:1">
+              <div class="bar-wrap">
+                <div class="bar" id="spectrumBarB">
+                  <div class="bar-indicator" id="barIndicatorB" style="width:0%"></div>
+                </div>
+              </div>
+              <div class="bar-labels">
+                <div>Quiet</div>
+                <div>Active</div>
+                <div>Extreme</div>
+              </div>
+            </div>
+          </div>
+          <div class="meta" id="metaTextB">—</div>
+        </div>
+        <div class="right">
+          <canvas id="sparkB" class="spark" width="360" height="40" style="background:transparent;border-radius:6px"></canvas>
+          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+            <div class="chip" id="windChipB">Wind: — km/h</div>
+            <div class="chip" id="presChipB">Pressure: — hPa</div>
+            <div class="chip" id="precipChipB">Precip: — mm</div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">Box score aggregates across bounding box. Extra sources best-effort.</div>
+    </div>
+
   </div>
 
 <script>
-/*
-  Client-only Weather Intensity Score demo using Open-Meteo
-  - Edit weights here if you want different sensitivity
-*/
+/* CONFIG */
 const CONFIG = {
   OPEN_METEO_BASE: 'https://api.open-meteo.com/v1/forecast',
-  // Score parameters (tweak as needed)
-  P_REF: 1015,             // reference pressure (hPa)
-  WEIGHT_PRESSURE: 1.8,    // per hPa
-  WEIGHT_WIND: 0.9,        // per km/h
-  WEIGHT_PRECIP: 1.4,      // per mm/hr
-  UPDATE_MINUTES: 15       // auto-update interval
+  P_REF: 1015,
+  WEIGHT_PRESSURE: 1.8,
+  WEIGHT_WIND: 0.9,
+  WEIGHT_PRECIP: 1.4,
+  UPDATE_MINUTES: 15,
+  SOURCE_WEIGHTS: { open: 0.6, zoom: 0.25, stations: 0.15 }
 };
 
-// DOM
-const latInput = document.getElementById('latInput');
-const lonInput = document.getElementById('lonInput');
-const labelInput = document.getElementById('labelInput');
-const refreshBtn = document.getElementById('refreshBtn');
+/* Additional API credentials / endpoints */
+const ZOOM_EARTH_ENDPOINT = 'https://api.zoom.earth/...'; // You must fill correct endpoint
+const METEOLOGIX_API_KEY = 'iJ7qDsFuV5j0ew_vDO76BT4Bo4yMILwhZF25a8mBap4A2H8J6zIG5kdJLpz7QtxcipY5xRe_btTtZTlBp33S1cZCx2TtiSz-nMihR_tWuUSAjV_9HIzQF-bn-UgSP-9w';
+const METEOLOGIX_ENDPOINT = 'https://api.meteologix.com/v1/observations/latest'; // example
 
-const scoreVal = document.getElementById('scoreVal');
-const scoreLabel = document.getElementById('scoreLabel');
-const metaText = document.getElementById('metaText');
-const windChip = document.getElementById('windChip');
-const presChip = document.getElementById('presChip');
-const precipChip = document.getElementById('precipChip');
-const barIndicator = document.getElementById('barIndicator');
-const sparkCanvas = document.getElementById('spark');
-const sparkCtx = sparkCanvas.getContext('2d');
+/* DOM refs for both A and B */
+const controls = {
+  latInput: document.getElementById('latInput'),
+  lonInput: document.getElementById('lonInput'),
+  labelInput: document.getElementById('labelInput'),
+  refreshBtn: document.getElementById('refreshBtn')
+};
 
-let historyScores = []; // last N scores
+const UI = {
+  A: {
+    scoreVal: document.getElementById('scoreValA'),
+    scoreLabel: document.getElementById('scoreLabelA'),
+    meta: document.getElementById('metaTextA'),
+    wind: document.getElementById('windChipA'),
+    pres: document.getElementById('presChipA'),
+    precip: document.getElementById('precipChipA'),
+    barIndicator: document.getElementById('barIndicatorA'),
+    sparkCanvas: document.getElementById('sparkA'),
+    sparkCtx: document.getElementById('sparkA').getContext('2d'),
+    history: []
+  },
+  B: {
+    scoreVal: document.getElementById('scoreValB'),
+    scoreLabel: document.getElementById('scoreLabelB'),
+    meta: document.getElementById('metaTextB'),
+    wind: document.getElementById('windChipB'),
+    pres: document.getElementById('presChipB'),
+    precip: document.getElementById('precipChipB'),
+    barIndicator: document.getElementById('barIndicatorB'),
+    sparkCanvas: document.getElementById('sparkB'),
+    sparkCtx: document.getElementById('sparkB').getContext('2d'),
+    history: []
+  }
+};
 
-refreshBtn.addEventListener('click', () => fetchAndUpdate(true));
+/* Fixed box for B */
+const BOX = {
+  topLeft: { lat: 62.58, lon: 49.42 },
+  bottomRight: { lat: 37.12, lon: 37.28 },
+  stepsLat: 3,
+  stepsLon: 3
+};
 
-async function fetchAndUpdate(force=false){
-  const lat = parseFloat(latInput.value);
-  const lon = parseFloat(lonInput.value);
-  if (Number.isNaN(lat) || Number.isNaN(lon)) { alert('Please enter valid lat/lon'); return; }
+/* categories */
+const CATEGORIES = [
+  {name:'Quiet', min:0, max:10, color:'rgba(46,196,182,0.95)'},
+  {name:'Minor', min:10, max:25, color:'#6fe5c6'},
+  {name:'Moderate', min:25, max:40, color:'#ffe88c'},
+  {name:'Active', min:40, max:80, color:'rgba(255,140,66,0.95)'},
+  {name:'Severe', min:80, max:120, color:'rgba(230,69,69,0.95)'},
+  {name:'Extreme', min:120, max:200, color:'rgba(126,34,206,0.95)'}
+];
 
-  // Build Open-Meteo request for hourly timeseries including pressure_msl, windspeed_10m, precipitation
-  // timezone=UTC so indexing is simple
+/* Helpers */
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function categoryFor(score){
+  for (let i=CATEGORIES.length-1;i>=0;i--){
+    if (score >= CATEGORIES[i].min) return CATEGORIES[i];
+  }
+  return CATEGORIES[0];
+}
+
+/* Fetch functions */
+async function fetchOpenMeteo(lat, lon){
   const url = new URL(CONFIG.OPEN_METEO_BASE);
   url.searchParams.set('latitude', lat);
   url.searchParams.set('longitude', lon);
   url.searchParams.set('hourly', 'pressure_msl,windspeed_10m,precipitation');
-  url.searchParams.set('timezone', 'UTC');
+  url.searchParams.set('timezone','UTC');
+  const resp = await fetch(url.toString(), {cache:'no-cache'});
+  if (!resp.ok) throw new Error('Open-Meteo error '+resp.status);
+  const d = await resp.json();
+  const times = d.hourly.time;
+  if (!times || !times.length) throw new Error('No hourly data');
+  const now = new Date();
+  const nowIso = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours())).toISOString().slice(0,13)+':00';
+  let idx = times.indexOf(nowIso);
+  if (idx < 0) idx = times.length - 1;
+  const pressure = d.hourly.pressure_msl[idx];
+  const wind_m_s = d.hourly.windspeed_10m[idx];
+  const precip = d.hourly.precipitation[idx];
+  return {
+    source: 'open',
+    pressure_hpa: pressure != null ? Number(pressure) : null,
+    wind_kmh: wind_m_s != null ? Number(wind_m_s)*3.6 : null,
+    precip_mm_hr: precip != null ? Number(precip) : 0
+  };
+}
 
+async function fetchZoomEarth(lat, lon){
   try {
-    const resp = await fetch(url.toString(), {cache: 'no-cache'});
-    if (!resp.ok) throw new Error('Open-Meteo error ' + resp.status);
-    const data = await resp.json();
+    const url = `${ZOOM_EARTH_ENDPOINT}?lat=${lat}&lon=${lon}`;
+    const resp = await fetch(url, {cache:'no-cache'});
+    if (!resp.ok) throw new Error('ZoomEarth API failed');
+    const d = await resp.json();
+    // assuming d has fields: pressure, wind, precip
+    return {
+      source: 'zoom',
+      pressure_hpa: d.pressure != null ? Number(d.pressure) : null,
+      wind_kmh: d.wind != null ? Number(d.wind) : null,
+      precip_mm_hr: d.precip != null ? Number(d.precip) : 0
+    };
+  } catch(e){
+    console.warn('ZoomEarth fetch failed', e);
+    return null;
+  }
+}
 
-    // find latest hour index
-    const times = data.hourly.time || [];
-    if (!times.length) throw new Error('No hourly data');
-    const now = new Date();
-    // Find closest hour index (UTC)
-    const nowUtcIso = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours())).toISOString().slice(0,13)+':00';
-    let idx = times.indexOf(nowUtcIso);
-    if (idx === -1) {
-      // fallback: use last available index
-      idx = times.length - 1;
+async function fetchMeteologix(lat, lon){
+  try {
+    const url = new URL(METEOLOGIX_ENDPOINT);
+    url.searchParams.set('lat', lat);
+    url.searchParams.set('lon', lon);
+    url.searchParams.set('apikey', METEOLOGIX_API_KEY);
+    const resp = await fetch(url.toString(), {cache:'no-cache'});
+    if (!resp.ok) throw new Error('Meteologix API failed '+resp.status);
+    const d = await resp.json();
+    // assume d has structure {wind, pressure_msl, precipitation_rate_mm_h}
+    return {
+      source: 'stations',
+      pressure_hpa: d.pressure_msl != null ? Number(d.pressure_msl) : null,
+      wind_kmh: d.wind != null ? Number(d.wind) : null,
+      precip_mm_hr: d.precipitation_rate_mm_h != null ? Number(d.precipitation_rate_mm_h) : 0
+    };
+  } catch(e){
+    console.warn('Meteologix fetch failed', e);
+    return null;
+  }
+}
+
+/* Score computations */
+function computeRawScoreSingle(measure){
+  const p = measure.pressure_hpa;
+  const w = measure.wind_kmh;
+  const pr = measure.precip_mm_hr;
+  const pterm = p != null ? Math.max(0, (CONFIG.P_REF - p)) * CONFIG.WEIGHT_PRESSURE : 0;
+  const wterm = w != null ? w * CONFIG.WEIGHT_WIND : 0;
+  const prterm = pr != null ? pr * CONFIG.WEIGHT_PRECIP : 0;
+  return pterm + wterm + prterm;
+}
+
+function blendSources(sources){
+  const weights = CONFIG.SOURCE_WEIGHTS;
+  const avail = sources.filter(s=>s);
+  if (avail.length === 0) return {score:0, details:[]};
+  let sumW = 0; avail.forEach(s=> sumW += weights[s.source] || 0);
+  if (sumW === 0){
+    avail.forEach(s=> s._w = 1/avail.length);
+  } else {
+    avail.forEach(s=> s._w = (weights[s.source] || 0)/sumW);
+  }
+  let final = 0; const details = [];
+  avail.forEach(s=>{
+    const raw = computeRawScoreSingle(s);
+    final += raw * s._w;
+    details.push({source:s.source, raw, weight: s._w});
+  });
+  return {score: +final.toFixed(2), details};
+}
+
+/* Combine measures for display */
+function combineMeasures(sources){
+  const avail = sources.filter(s=>s);
+  if (avail.length === 0) return {pressure_hpa:null, wind_kmh:null, precip_mm_hr:0};
+  let sumW = 0; avail.forEach(s=> sumW += CONFIG.SOURCE_WEIGHTS[s.source] || 0);
+  if (sumW === 0){
+    avail.forEach(s=> s._w = 1/avail.length);
+  } else {
+    avail.forEach(s=> s._w = (CONFIG.SOURCE_WEIGHTS[s.source] || 0)/sumW);
+  }
+  const out = {pressure_hpa:0, wind_kmh:0, precip_mm_hr:0};
+  let countP=0, countW=0;
+  avail.forEach(s=>{
+    if (s.pressure_hpa != null){ out.pressure_hpa += s.pressure_hpa * s._w; countP++; }
+    if (s.wind_kmh != null){ out.wind_kmh += s.wind_kmh * s._w; countW++; }
+    out.precip_mm_hr += s.precip_mm_hr * s._w;
+  });
+  if (countP === 0) out.pressure_hpa = null;
+  if (countW === 0) out.wind_kmh = null;
+  return out;
+}
+
+/* Render outcome */
+function render(ui, score, measures){
+  ui.scoreVal.textContent = score.toFixed(2);
+  const cat = categoryFor(score);
+  ui.scoreLabel.innerHTML = `<span class="status-dot" style="background:${cat.color}"></span> ${cat.name}`;
+  const regionName = controls.labelInput.value.trim() ? ('Region: '+controls.labelInput.value.trim()) : '';
+  ui.meta.textContent = `${regionName} • last update: ${new Date().toLocaleString()}`;
+  ui.wind.textContent = measures.wind_kmh != null ? `Wind: ${measures.wind_kmh.toFixed(0)} km/h` : 'Wind: —';
+  ui.pres.textContent = measures.pressure_hpa != null ? `Pressure: ${measures.pressure_hpa.toFixed(0)} hPa` : 'Pressure: —';
+  ui.precip.textContent = `Precip: ${measures.precip_mm_hr != null ? measures.precip_mm_hr.toFixed(1) : '0.0'} mm`;
+  const pct = Math.min(100, Math.round((score/200)*100));
+  ui.barIndicator.style.width = pct + '%';
+  ui.barIndicator.style.background = cat.color;
+  ui.history.push(score);
+  if (ui.history.length > 24) ui.history.shift();
+  drawSpark(ui.sparkCtx, ui.sparkCanvas, ui.history);
+}
+
+async function updateA(){
+  const lat = parseFloat(controls.latInput.value);
+  const lon = parseFloat(controls.lonInput.value);
+  if (isNaN(lat) || isNaN(lon)) return;
+  const open = await fetchOpenMeteo(lat, lon);
+  const zoom = await fetchZoomEarth(lat, lon);
+  const station = await fetchMeteologix(lat, lon);
+  const blend = blendSources([open, zoom, station]);
+  const measures = combineMeasures([open, zoom, station]);
+  render(UI.A, blend.score, measures);
+}
+
+async function updateB(){
+  const lat1 = BOX.topLeft.lat, lon1 = BOX.topLeft.lon;
+  const lat2 = BOX.bottomRight.lat, lon2 = BOX.bottomRight.lon;
+  const stepsLat = BOX.stepsLat, stepsLon = BOX.stepsLon;
+  const coords = [];
+  for (let i=0;i<stepsLat;i++){
+    const fLat = i/(stepsLat-1);
+    for (let j=0;j<stepsLon;j++){
+      const fLon = j/(stepsLon-1);
+      coords.push({lat: lat1 + (lat2-lat1)*fLat, lon: lon1 + (lon2-lon1)*fLon});
     }
-
-    // Read variables
-    const pressure = (data.hourly.pressure_msl && data.hourly.pressure_msl[idx] != null) ? Number(data.hourly.pressure_msl[idx]) : null;
-    const wind_m_s = (data.hourly.windspeed_10m && data.hourly.windspeed_10m[idx] != null) ? Number(data.hourly.windspeed_10m[idx]) : null;
-    const precip = (data.hourly.precipitation && data.hourly.precipitation[idx] != null) ? Number(data.hourly.precipitation[idx]) : 0;
-
-    // Convert units
-    // Open-Meteo windspeed_10m is m/s — convert to km/h
-    const wind_kmh = wind_m_s != null ? (wind_m_s * 3.6) : null;
-    const pressure_hpa = pressure; // already hPa
-    const precip_mm_hr = precip; // mm for hourly precipitation rate (approx)
-
-    // Compute score using weights
-    const pterm = pressure_hpa != null ? Math.max(0, (CONFIG.P_REF - pressure_hpa)) * CONFIG.WEIGHT_PRESSURE : 0;
-    const wterm = wind_kmh != null ? (wind_kmh * CONFIG.WEIGHT_WIND) : 0;
-    const prterm = precip_mm_hr != null ? (precip_mm_hr * CONFIG.WEIGHT_PRECIP) : 0;
-
-    const rawScore = +(pterm + wterm + prterm).toFixed(2);
-
-    // update history (keep last 24)
-    historyScores.push({t: new Date().toISOString(), v: rawScore});
-    if (historyScores.length > 24) historyScores.shift();
-
-    // Render
-    renderScore(rawScore, {pressure_hpa, wind_kmh, precip_mm_hr});
-  } catch (err) {
-    console.error(err);
-    scoreVal.textContent = 'Error';
-    scoreLabel.textContent = 'Could not load data';
-    metaText.textContent = err.message || '';
   }
+  const results = await Promise.all(coords.map(c => fetchOpenMeteo(c.lat, c.lon)));
+  const openAvg = averageMeasures(results.filter(r=>r));
+  const zoom = await fetchZoomEarth((lat1+lat2)/2, (lon1+lon2)/2);
+  const station = await fetchMeteologix((lat1+lat2)/2, (lon1+lon2)/2);
+  const blend = blendSources([openAvg ? {...openAvg, source:'open'} : null, zoom, station]);
+  const measures = combineMeasures([openAvg ? {...openAvg, source:'open'} : null, zoom, station]);
+  render(UI.B, blend.score, measures);
 }
 
-function renderScore(score, {pressure_hpa, wind_kmh, precip_mm_hr}){
-  scoreVal.textContent = score.toFixed(2);
-  // label & color class
-  let label='Quiet', color='var(--good)';
-  if (score >= 120) { label='Extreme'; color='var(--danger)'; }
-  else if (score >= 40) { label='Active'; color='var(--warn)'; }
-  scoreLabel.innerHTML = `<span style="display:inline-block;margin-right:8px" class="status-dot" id="dot" style="background:${color}"></span> ${label}`;
-
-  // meta
-  const regionName = labelInput.value.trim() ? ('Region: ' + labelInput.value.trim()) : 'Center: ' + latInput.value + ',' + lonInput.value;
-  metaText.textContent = `${regionName} • last update: ${new Date().toLocaleString()}`;
-
-  windChip.textContent = wind_kmh != null ? `Wind: ${wind_kmh.toFixed(0)} km/h` : 'Wind: —';
-  presChip.textContent = pressure_hpa != null ? `Pressure: ${pressure_hpa.toFixed(0)} hPa` : 'Pressure: —';
-  precipChip.textContent = `Precip: ${precip_mm_hr != null ? precip_mm_hr.toFixed(1) : '0.0'} mm`;
-
-  // move indicator along a 0..200+ score range, clamp to [0,100]%
-  const maxScale = 180; // scale used for progress percent (tweak)
-  const pct = Math.min(100, Math.round((score / maxScale) * 100));
-  barIndicator.style.width = pct + '%';
-  // barIndicator tint depending on category
-  if (score >= 120) barIndicator.style.background = 'rgba(230,69,69,0.85)';
-  else if (score >= 40) barIndicator.style.background = 'rgba(255,140,66,0.85)';
-  else barIndicator.style.background = 'rgba(46,196,182,0.85)';
-
-  drawSpark(historyScores.map(s=>s.v));
+function averageMeasures(list){
+  if (!list.length) return null;
+  const sum = {pressure_hpa:0, wind_kmh:0, precip_mm_hr:0};
+  let countP=0, countW=0, countPr=0;
+  list.forEach(l=>{
+    if (l.pressure_hpa != null){ sum.pressure_hpa += l.pressure_hpa; countP++; }
+    if (l.wind_kmh != null){ sum.wind_kmh += l.wind_kmh; countW++; }
+    sum.precip_mm_hr += l.precip_mm_hr; countPr++;
+  });
+  return {
+    source: 'open',
+    pressure_hpa: countP? sum.pressure_hpa/countP : null,
+    wind_kmh: countW? sum.wind_kmh/countW : null,
+    precip_mm_hr: sum.precip_mm_hr/countPr
+  };
 }
 
-/* simple sparkline */
-function drawSpark(values){
-  const w = sparkCanvas.width;
-  const h = sparkCanvas.height;
-  sparkCtx.clearRect(0,0,w,h);
+controls.refreshBtn.addEventListener('click', ()=>{ updateA(); updateB(); });
 
-  if (!values || values.length===0) {
-    // empty placeholder
-    sparkCtx.fillStyle = 'rgba(255,255,255,0.03)';
-    sparkCtx.fillRect(0,0,w,h);
-    return;
-  }
-  const max = Math.max(...values);
-  const min = Math.min(...values);
-  const range = Math.max(0.01, max - min);
-  sparkCtx.lineWidth = 2;
-  // gradient stroke
-  const grad = sparkCtx.createLinearGradient(0,0,w,0);
-  grad.addColorStop(0,'#00d1b2'); grad.addColorStop(0.6,'#ffdd57'); grad.addColorStop(1,'#ff6b6b');
-  sparkCtx.strokeStyle = grad;
-  sparkCtx.beginPath();
-  for (let i=0;i<values.length;i++){
-    const x = (i/(values.length-1 || 1)) * (w - 6) + 3;
-    const y = h - 6 - ((values[i] - min) / range) * (h - 12);
-    if (i===0) sparkCtx.moveTo(x,y); else sparkCtx.lineTo(x,y);
-  }
-  sparkCtx.stroke();
+updateA();
+updateB();
+setInterval(()=>{ updateA(); updateB(); }, CONFIG.UPDATE_MINUTES * 60 * 1000);
 
-  // fill under curve slightly
-  sparkCtx.globalAlpha = 0.08;
-  sparkCtx.fillStyle = '#00d1b2';
-  sparkCtx.beginPath();
-  for (let i=0;i<values.length;i++){
-    const x = (i/(values.length-1 || 1)) * (w - 6) + 3;
-    const y = h - 6 - ((values[i] - min) / range) * (h - 12);
-    if (i===0) sparkCtx.moveTo(x,y); else sparkCtx.lineTo(x,y);
-  }
-  sparkCtx.lineTo(w-3,h-4); sparkCtx.lineTo(3,h-4);
-  sparkCtx.closePath();
-  sparkCtx.fill();
-  sparkCtx.globalAlpha = 1.0;
-}
-
-/* start and schedule updates */
-fetchAndUpdate();
-setInterval(fetchAndUpdate, CONFIG.UPDATE_MINUTES * 60 * 1000);
 </script>
 </body>
 </html>
