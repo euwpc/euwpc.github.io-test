@@ -420,9 +420,33 @@ function averageMeasures(list){
   };
 }
 
+  function saveHistory() {
+  const data = {
+    A: UI.A.history,
+    B: UI.B.history,
+    ts: Date.now()
+  };
+  localStorage.setItem("weatherHistory", JSON.stringify(data));
+}
+
+function loadHistory() {
+  const str = localStorage.getItem("weatherHistory");
+  if (!str) return;
+  try {
+    const data = JSON.parse(str);
+    if (data.A) UI.A.history = data.A;
+    if (data.B) UI.B.history = data.B;
+    drawSpark(UI.A.sparkCtx, UI.A.sparkCanvas, UI.A.history);
+    drawSpark(UI.B.sparkCtx, UI.B.sparkCanvas, UI.B.history);
+  } catch(e) {
+    console.warn("History load failed", e);
+  }
+}
+
 controls.refreshBtn.addEventListener('click', ()=>{
   updateA();
   updateB();
+  saveHistory();
 });
 
 
@@ -440,18 +464,21 @@ function updateCountdown() {
   const s = remaining % 60;
   countdownEl.textContent = `Next update in ${m}:${s.toString().padStart(2,'0')}`;
   if (remaining > 0) {
-    remaining--;
-  } else {
-    remaining = CONFIG.UPDATE_MINUTES * 60;
-    updateA();
-    updateB();
-  }
+  remaining--;
+} else {
+  remaining = CONFIG.UPDATE_MINUTES * 60;
+  updateA().then(saveHistory);
+  updateB().then(saveHistory);
+}
 
   // color fade (red when under 1 min)
   if (remaining < 60) countdownEl.style.color = "#e64545";
   else countdownEl.style.color = "#9aa3ad";
 }
-
+  
+loadHistory();
+updateA().then(saveHistory);
+updateB().then(saveHistory);
 setInterval(updateCountdown, 1000);
 
   updateA();
