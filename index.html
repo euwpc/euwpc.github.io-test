@@ -46,6 +46,7 @@
         <input id="labelInput" placeholder="Region name (optional)" style="min-width:200px" />
         <input id="latInput" placeholder="Latitude" value="59.4370" style="width:110px" />
         <input id="lonInput" placeholder="Longitude" value="24.7536" style="width:110px" />
+        <button id="refreshBtn">Update</button>
         <span id="countdown" style="font-size:0.85rem;color:#9aa3ad;margin-left:8px;">Next update in 15:00</span>
       </div>
     </div>
@@ -417,7 +418,12 @@ function averageMeasures(list){
   };
 }
 
-controls.refreshBtn.addEventListener('click', ()=>{ updateA(); updateB(); });
+controls.refreshBtn.addEventListener('click', ()=>{
+  updateA();
+  updateB();
+  remaining = CONFIG.UPDATE_MINUTES * 60; // reset countdown
+});
+
 
   /* countdown timer */
 let remaining = CONFIG.UPDATE_MINUTES * 60;
@@ -442,6 +448,10 @@ function updateCountdown() {
 }
 
 setInterval(updateCountdown, 1000);
+
+  updateA();
+updateB();
+
 
 
 </script>
