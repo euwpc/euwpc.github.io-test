@@ -46,7 +46,7 @@
         <input id="labelInput" placeholder="Region name (optional)" style="min-width:200px" />
         <input id="latInput" placeholder="Latitude" value="59.4370" style="width:110px" />
         <input id="lonInput" placeholder="Longitude" value="24.7536" style="width:110px" />
-        <button id="refreshBtn">Update now</button>
+        <span id="countdown" style="font-size:0.85rem;color:#9aa3ad;margin-left:8px;">Next update in 15:00</span>
       </div>
     </div>
 
@@ -133,7 +133,7 @@ const CONFIG = {
   OPEN_METEO_BASE: 'https://api.open-meteo.com/v1/forecast',
   P_REF: 1015,
   WEIGHT_PRESSURE: 1.8,
-  WEIGHT_WIND: 0.9,
+  WEIGHT_WIND: 2.8,
   WEIGHT_PRECIP: 1.4,
   UPDATE_MINUTES: 15,
   SOURCE_WEIGHTS: { open: 0.6, zoom: 0.25, stations: 0.15 }
@@ -344,6 +344,29 @@ function render(ui, score, measures){
   drawSpark(ui.sparkCtx, ui.sparkCanvas, ui.history);
 }
 
+  function drawSpark(ctx, canvas, data){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if (data.length < 2) return;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  ctx.beginPath();
+  for (let i=0;i<data.length;i++){
+    const x = (i/(data.length-1))*canvas.width;
+    const y = canvas.height - ((data[i]-min)/(max-min+1e-6))*canvas.height;
+    if (i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle = '#ffcc00';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,204,0,0.15)';
+  ctx.lineTo(canvas.width,canvas.height);
+  ctx.lineTo(0,canvas.height);
+  ctx.closePath();
+  ctx.fill();
+}
+
+
 async function updateA(){
   const lat = parseFloat(controls.latInput.value);
   const lon = parseFloat(controls.lonInput.value);
@@ -396,9 +419,30 @@ function averageMeasures(list){
 
 controls.refreshBtn.addEventListener('click', ()=>{ updateA(); updateB(); });
 
-updateA();
-updateB();
-setInterval(()=>{ updateA(); updateB(); }, CONFIG.UPDATE_MINUTES * 60 * 1000);
+  /* countdown timer */
+let remaining = CONFIG.UPDATE_MINUTES * 60;
+const countdownEl = document.getElementById('countdown');
+
+function updateCountdown() {
+  if (!countdownEl) return;
+  const m = Math.floor(remaining / 60);
+  const s = remaining % 60;
+  countdownEl.textContent = `Next update in ${m}:${s.toString().padStart(2,'0')}`;
+  if (remaining > 0) {
+    remaining--;
+  } else {
+    remaining = CONFIG.UPDATE_MINUTES * 60;
+    updateA();
+    updateB();
+  }
+
+  // color fade (red when under 1 min)
+  if (remaining < 60) countdownEl.style.color = "#e64545";
+  else countdownEl.style.color = "#9aa3ad";
+}
+
+setInterval(updateCountdown, 1000);
+
 
 </script>
 </body>
