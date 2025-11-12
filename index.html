@@ -143,7 +143,7 @@ const CONFIG = {
 /* Additional API credentials / endpoints */
 const ZOOM_EARTH_ENDPOINT = 'https://api.zoom.earth/...'; // You must fill correct endpoint
 const METEOLOGIX_API_KEY = 'iJ7qDsFuV5j0ew_vDO76BT4Bo4yMILwhZF25a8mBap4A2H8J6zIG5kdJLpz7QtxcipY5xRe_btTtZTlBp33S1cZCx2TtiSz-nMihR_tWuUSAjV_9HIzQF-bn-UgSP-9w';
-const METEOLOGIX_ENDPOINT = 'https://api.meteologix.com/v1/observations/latest'; // example
+const METEOLOGIX_ENDPOINT = 'https://api.kachelmannwetter.com/v02'; // example
 
 /* DOM refs for both A and B */
 const controls = {
@@ -255,7 +255,7 @@ async function fetchZoomEarth(lat, lon){
 
 async function fetchMeteologix(lat, lon){
   try {
-    const url = new URL(METEOLOGIX_ENDPOINT);
+    const url = new URL(METEOLOGIX_ENDPOINT + '/observations/latest');
     url.searchParams.set('lat', lat);
     url.searchParams.set('lon', lon);
     url.searchParams.set('apikey', METEOLOGIX_API_KEY);
