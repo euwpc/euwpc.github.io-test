@@ -133,9 +133,9 @@
 const CONFIG = {
   OPEN_METEO_BASE: 'https://api.open-meteo.com/v1/forecast',
   P_REF: 1015,
-  WEIGHT_PRESSURE: 1.8,
-  WEIGHT_WIND: 2.8,
-  WEIGHT_PRECIP: 1.4,
+  WEIGHT_PRESSURE: 1.2,
+  WEIGHT_WIND: 0.9,
+  WEIGHT_PRECIP: 1.1,
   UPDATE_MINUTES: 15,
   SOURCE_WEIGHTS: { open: 0.6, zoom: 0.25, stations: 0.15 }
 };
@@ -329,7 +329,8 @@ function combineMeasures(sources){
 
 /* Render outcome */
 function render(ui, score, measures){
-  ui.scoreVal.textContent = score.toFixed(2);
+    const clampedScore = Math.max(0, Math.min(200, score));
+  ui.scoreVal.textContent = clampedScore.toFixed(2);
   const cat = categoryFor(score);
   ui.scoreLabel.innerHTML = `<span class="status-dot" style="background:${cat.color}"></span> ${cat.name}`;
   const regionName = controls.labelInput.value.trim() ? ('Region: '+controls.labelInput.value.trim()) : '';
@@ -337,30 +338,31 @@ function render(ui, score, measures){
   ui.wind.textContent = measures.wind_kmh != null ? `Wind: ${measures.wind_kmh.toFixed(0)} km/h` : 'Wind: —';
   ui.pres.textContent = measures.pressure_hpa != null ? `Pressure: ${measures.pressure_hpa.toFixed(0)} hPa` : 'Pressure: —';
   ui.precip.textContent = `Precip: ${measures.precip_mm_hr != null ? measures.precip_mm_hr.toFixed(1) : '0.0'} mm`;
-  const pct = Math.min(100, Math.round((score/200)*100));
+    const pct = Math.min(100, Math.round((clampedScore/200)*100));
   ui.barIndicator.style.width = pct + '%';
   ui.barIndicator.style.background = cat.color;
-  ui.history.push(score);
+    ui.history.push(clampedScore);
   if (ui.history.length > 24) ui.history.shift();
   drawSpark(ui.sparkCtx, ui.sparkCanvas, ui.history);
 }
 
   function drawSpark(ctx, canvas, data){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  if (data.length < 2) return;
+  if (!data || data.length < 2) return;
   const max = Math.max(...data);
   const min = Math.min(...data);
+  const range = Math.max(0.0001, max - min);
   ctx.beginPath();
   for (let i=0;i<data.length;i++){
     const x = (i/(data.length-1))*canvas.width;
-    const y = canvas.height - ((data[i]-min)/(max-min+1e-6))*canvas.height;
+    const y = canvas.height - ((data[i]-min)/range)*canvas.height;
     if (i===0) ctx.moveTo(x,y);
     else ctx.lineTo(x,y);
   }
   ctx.strokeStyle = '#ffcc00';
   ctx.lineWidth = 2;
   ctx.stroke();
-  ctx.fillStyle = 'rgba(255,204,0,0.15)';
+  ctx.fillStyle = 'rgba(255,204,0,0.12)';
   ctx.lineTo(canvas.width,canvas.height);
   ctx.lineTo(0,canvas.height);
   ctx.closePath();
@@ -421,13 +423,16 @@ function averageMeasures(list){
 controls.refreshBtn.addEventListener('click', ()=>{
   updateA();
   updateB();
-  remaining = CONFIG.UPDATE_MINUTES * 60; // reset countdown
 });
 
 
   /* countdown timer */
 let remaining = CONFIG.UPDATE_MINUTES * 60;
 const countdownEl = document.getElementById('countdown');
+
+  updateCountdown(); 
+  updateA();
+  updateB();
 
 function updateCountdown() {
   if (!countdownEl) return;
